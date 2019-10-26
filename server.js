@@ -1,10 +1,6 @@
 var express = require('express');
 var http = require('http');
 
-var bodyParser = require('body-parser');
-var multer = require('multer');
-// var upload = multer({ storage: storage })
-
 var fs = require('fs');
 
 var app = express();
@@ -34,7 +30,7 @@ app.get('/all', function (req, res) {
   });
 
 app.get('/id/:id', function (req, res) {
-// 2. A person using id 
+// 2. A person using id
     console.log('the message', req.body);
     console.log('the id', req.params.id)
         res.set('Content-Type', 'application/json');
