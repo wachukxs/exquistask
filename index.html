@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Exquis!</title>
+    <link rel="stylesheet" href="bootstrap.css">
+    <script src="jquery-3.3.1.min.js"></script>
+    <script src="bootstrap.min.js"></script>
+</head>
+<body>
+    <div class="jumbotron">
+        <h3>Do as instructed</h3>
+    </div>
+
+    <div class="container">
+        <ul class="nav nav-tabs nav-justified" id="myTab" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" id="all-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">List all people</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="id-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Get person by id</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="agepay-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">men & >=30yr & >$3K</a>
+            </li>
+          </ul>
+          <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="all-tab">
+                    <div class="container mt-3">
+                            <div class="accordion" id="accordionExample">
+                                    
+                            </div>
+                        
+                    </div>
+    
+            </div>
+    
+            <!-- break -->
+            <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="id-tab">
+                <div class="container mt-3">
+                    <form class="form-inline" id="getbyid" name="getid">
+
+                            <label class="sr-only" for="id">Identity</label>
+                            <div class="input-group mb-2 mr-sm-2">
+                              <div class="input-group-prepend">
+                                <div class="input-group-text">ID</div>
+                              </div>
+                              <input type="text" name="id" required class="form-control" id="inputID" placeholder="Enter ID">
+                            </div>
+
+                        <button type="submit" class="btn btn-primary mb-2">Confirm identity</button>
+                    </form>
+
+                    <div id="justone">
+
+                    </div>
+                </div>
+    
+            </div>
+    
+            <!-- break -->
+            <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="agepay-tab">
+                
+                <div class="container mt-3">
+                    <div class="accordion" id="accordionExample2"></div>
+                </div>
+    
+            </div>
+          </div>
+    </div>
+
+    
+
+
+
+    <script>
+        // Access the form element...
+        var form = document.getElementById( "getbyid" );
+        
+        // ...and take over its submit event.
+        form.addEventListener( "submit", function( event ) {
+            event.preventDefault(); // the default behaviour is refreshing the page and adding search params to the url
+
+            fetch('/id/' + document.forms[0].elements['id'].value)
+            .then(
+                function(response) {
+                if (response.status !== 200) {
+                    console.log('Looks like there was a problem. Status Code: ' + response.status);
+                    if (response.status == 406) {
+                        alert('ID not found')
+                    }
+                    
+                    return;
+                }
+
+                // Examine the text in the response
+                response.json().then(function(data) {
+                    console.log(data);
+
+                        $('#justone').append(`<div class="card" style="">
+                                        <div class="card-body">
+                                            <h5 class="card-title">${data.email}</h5>
+                                            <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
+                                            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                                            <a href="#" class="card-link">Card link</a>
+                                            <a href="#" class="card-link">Another link</a>
+                                        </div>
+                                    </div>`);
+                        
+                    
+                });
+                }
+            )
+            .catch(function(err) {
+                console.log('Fetch Error :-S', err);
+            });
+        }, false, true ); // https://developer.mozilla.org/en-US/docs/Web/Events/submit
+    </script>
+
+    <script>
+        (function () {
+            // body of the function
+            fetch('/all')
+            .then(
+                function(response) {
+                if (response.status !== 200) {
+                    console.log('Looks like there was a problem. Status Code: ' +
+                    response.status);
+                    return;
+                }
+
+                // Examine the text in the response
+                response.json().then(function(data) {
+                    console.log(data);
+                    for (let index = 0; index < data.length; index++) {
+                        const element = data[index];
+                        var f = '';
+                        for (let index = 0; index < element.friends.length; index++) {
+                            const e = element.friends[index];
+                            f += `<li class="list-group-item d-flex justify-content-between align-items-center">
+                                    ${e.id}. ${e.name}
+                                </li>`
+                        }
+
+                        var d = '';
+                        for (let index = 0; index < element.tags.length; index++) {
+                            const v = element.tags[index];
+                            d += `<a href="#" class="card-link">${v}</a>`
+                        }
+                        
+
+                        $('#accordionExample').append(`<div class="card">
+                                <div class="card-header" id="${element._id}">
+                                <h5 class="mb-0">
+                                    <button class="btn btn-link justify-content-between" type="button" data-toggle="collapse" data-target="#collapse${element.index}" aria-expanded="${(element.index == 0 ? 'true' : 'false' )}" aria-controls="collapse${element.index}">
+                                        ${element.index} ${element._id}
+                                    </button>
+                                </h5>
+                                </div>
+                            
+                                <div id="collapse${element.index}" class="collapse ${(element.index == 0 ? 'show' : '' )}" aria-labelledby="heading${element.index}" data-parent="#accordionExample">
+                                
+                                    <div class="card-body">
+
+                                            <div class="media">
+                                                <img class="align-self-start mr-3" src="${element.picture}" alt="Generic placeholder image">
+                                                <div class="media-body">
+                                                        <h2 class="card-title">${element.name}</h2>
+                                                        <h4 class="card-title">${element.email}</h4>
+                                                        <h5 class="card-subtitle mb-2 text-muted">${element.company}</h5>
+                                                        <h6 class="card-subtitle mb-2 text-muted">${element.address}</h6>
+                                                        <h6 class="card-subtitle mb-2 text-muted">${element.phone}</h6>
+
+                                                        <p class="card-text">${element.greeting}</p>
+                                                        <p class="card-text">${element.about}</p>
+                                                </div>
+                                            </div>
+
+                                        
+                                        <div class="card mt-3 mb-3" style="">
+                                        <div class="card-header ">
+                                            Other details
+                                        </div>
+                                        <ul class="list-group list-group-flush">
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        Age
+                                                    <span class="badge badge-primary badge-pill">${element.age}</span>
+                                                </li>
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        Balance
+                                                    <span class="badge badge-primary badge-pill">${element.balance}</span>
+                                                </li>
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        Eye color
+                                                    <span class="badge badge-primary badge-pill">${element.eyeColor}</span>
+                                                </li>
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        Favorite fruit
+                                                    <span class="badge badge-primary badge-pill">${element.favoriteFruit}</span>
+                                                </li>
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        Gender
+                                                    <span class="badge badge-primary badge-pill">${element.gender}</span>
+                                                </li>
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        latlng
+                                                    <span class="badge badge-primary badge-pill">${element.latitude}, ${element.longitude}</span>
+                                                </li>
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        Registered at
+                                                    <span class="badge badge-primary badge-pill">${element.registered}</span>
+                                                </li>
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        Active
+                                                    <span class="badge badge-primary badge-pill">${element.isActive}</span>
+                                                </li>
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        GUID
+                                                    <span class="badge badge-primary badge-pill">${element.guid}</span>
+                                                </li>
+                                        </ul>
+                                        </div>
+
+                                        <div class="card mt-1" style="">
+                                        <div class="card-header">
+                                            Friends
+                                        </div>
+                                        <ul class="list-group list-group-flush">
+                                                ${f}
+                                        </ul>
+                                        </div>
+                                        <p class="mt-4">
+                                            <p>Tags:</p>
+                                            ${d}  
+                                        </p>
+                                    </div>
+                                    
+                                    </div>
+
+                        </div>`);
+                        
+                    }
+                });
+                }
+            )
+            .catch(function(err) {
+                console.log('Fetch Error :-S', err);
+            });
+
+        }());
+
+    </script>
+
+
+
+<script>
+        (function () {
+            // body of the function
+            fetch('/allmen')
+            .then(
+                function(response) {
+                if (response.status !== 200) {
+                    console.log('Looks like there was a problem. Status Code: ' +
+                    response.status);
+                    return;
+                }
+
+                // Examine the text in the response
+                response.json().then(function(data) {
+                    console.log(data);
+                    for (let index = 0; index < data.length; index++) {
+                        const element = data[index];
+                        
+                        $('#accordionExample2').append(`<div class="card">
+                                <div class="card-header" id="${element._id}">
+                                <h5 class="mb-0">
+                                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse${element.index}A" aria-expanded="${(element.index == 0 ? 'true' : 'false' )}" aria-controls="collapse${element.index}">
+                                        ${element.index}
+                                    </button>
+                                </h5>
+                                </div>
+                            
+                                <div id="collapse${element.index}A" class="collapse show" aria-labelledby="heading${element.index}A" data-parent="#accordionExample2">
+                                
+                                    <div class="card-body">
+                                        <h5 class="card-title">${element.email}</h5>
+                                        <h6 class="card-subtitle mb-2 text-muted">${element.address}</h6>
+                                        <p class="card-text">${element.about}.</p>
+                                        <a href="#" class="card-link">Card link</a>
+                                        <a href="#" class="card-link">Another link</a>
+                                        
+                                    </div>
+                                    </div>
+
+                        </div>`);
+                        
+                    }
+                });
+                }
+            )
+            .catch(function(err) {
+                console.log('Fetch Error :-S', err);
+            });
+
+        }());
+
+    </script>
+</body>
+</html>
